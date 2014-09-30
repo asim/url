@@ -60,14 +60,21 @@ func main() {
 			return
 		}
 
-		u := decode(parts[2])
+		var u string
+		if len(parts) >= 3 {
+			u = decode(strings.Join(parts[2:len(parts)-1], "/"))
+		} else {
+			u = decode(parts[2])
+		}
+
 		pu, err := url.Parse(u)
 		if err != nil || !pu.IsAbs() {
 			http.Redirect(w, r, "/", 302)
 			return
 		}
 
-		http.Redirect(w, r, u, 301)
+		qu, _ := url.QueryUnescape(u)
+		http.Redirect(w, r, qu, 301)
 	})
 
 	http.HandleFunc("/lengthen", func(w http.ResponseWriter, r *http.Request) {

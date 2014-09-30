@@ -16,6 +16,12 @@
 	background: #FBFBFB;
 	border: 1px solid #ccc;
 	padding: 20px;
+	-ms-word-break: break-all;
+	word-break: break-all;
+	word-break: break-word;
+	-webkit-hyphens: auto;
+	-moz-hyphens: auto;
+	hyphens: auto;
     }
     input {
 	width: 100%;
@@ -42,7 +48,7 @@
     <p>
     <div id="cruft"></div>
     <p>
-    <img src="asl.am.jpg"></img>
+    <img src="asl.am.jpg" alt="prawn"></img>
   </div>
   <script type="text/javascript">
     function lengthen() {
@@ -54,7 +60,7 @@
 
       var xmlHttp = null;
       xmlHttp = new XMLHttpRequest();
-      xmlHttp.open("GET", '/lengthen?url=' + url, false);
+      xmlHttp.open("GET", '/lengthen?url=' + encodeURIComponent(url), false);
       xmlHttp.send(null);
 
       var cruft = document.getElementById('cruft');
