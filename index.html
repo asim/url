@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>asl.am!</title>
+<style>
+    .main {
+        text-align: center;
+        font-family: Verdana, Geneva, sans-serif;
+        width: 90%;
+	max-width: 500px;
+        margin: 0 auto;
+    }
+    #cruft {
+	display: none;
+	background: #FBFBFB;
+	border: 1px solid #ccc;
+	padding: 20px;
+    }
+    input {
+	width: 100%;
+        font-size: 20px;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box; 
+        box-sizing: border-box;
+        padding: 10px;
+	text-align: center;
+    }
+    img {
+	max-width: 100%;
+	height: auto;
+	width: auto;
+    }
+</style>
+</head>
+<body>
+  <div class="main">
+    <h2><a href="/">asl.am</a> <small>the place for all your URL lengthening needs</small></h2>
+    <form action="/lengthen" onsubmit="return lengthen();">
+      <input id="url" name="url" value="" placeholder="google.com" autocomplete="off">
+    </form>
+    <p>
+    <div id="cruft"></div>
+    <p>
+    <img src="asl.am.jpg"></img>
+  </div>
+  <script type="text/javascript">
+    function lengthen() {
+      var url = document.getElementById('url').value;
+
+      if (!url.match('https?://')) {
+	url = 'http://' + url;
+      }
+
+      var xmlHttp = null;
+      xmlHttp = new XMLHttpRequest();
+      xmlHttp.open("GET", '/lengthen?url=' + url, false);
+      xmlHttp.send(null);
+
+      var cruft = document.getElementById('cruft');
+      if (xmlHttp.status == 200) {
+        cruft.innerHTML = '<a href="'+xmlHttp.responseText+'">'+xmlHttp.responseText+'</a>';
+      } else {
+        cruft.innerHTML = xmlHttp.responseText;
+      }
+
+      document.getElementById('cruft').style.display = 'block';
+
+      return false;
+    }
+  </script>
+</body>
+</html>
