@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -16,6 +17,8 @@ import (
 var (
 	dir    = "/home/asim/cache"
 	domain = "asl.am"
+	latest chan string
+	reqCh  chan chan []string
 	words  []string
 )
 
@@ -30,6 +33,25 @@ func init() {
 	for _, word := range bytes.Split(b, []byte("\n")) {
 		words = append(words, strings.ToLower(string(word)))
 	}
+
+	latest = make(chan string, 100)
+	reqCh = make(chan chan []string)
+
+	go func() {
+		var urls []string
+
+		for {
+			select {
+			case u := <-latest:
+				urls = append(urls, u)
+				if len(urls) > 5 {
+					urls = urls[1:]
+				}
+			case ch := <-reqCh:
+				ch <- urls
+			}
+		}
+	}()
 }
 
 func encode(u string) string {
@@ -53,6 +75,15 @@ func random() string {
 }
 
 func main() {
+	http.HandleFunc("/latest", func(w http.ResponseWriter, r *http.Request) {
+		ch := make(chan []string)
+		reqCh <- ch
+		urls := <-ch
+		b, _ := json.Marshal(urls)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, string(b))
+	})
+
 	http.HandleFunc("/u/", func(w http.ResponseWriter, r *http.Request) {
 		parts := strings.Split(r.URL.Path, "/")
 		if len(parts) < 3 {
@@ -90,6 +121,10 @@ func main() {
 		ul := fmt.Sprintf("http://%s/u/%s/%s", domain, encode(u), random())
 		fmt.Fprintf(w, ul)
 
+		select {
+		case latest <- ul:
+		default:
+		}
 	})
 
 	log.Fatal(http.ListenAndServe(":9999", nil))

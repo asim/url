@@ -11,7 +11,7 @@
 	max-width: 500px;
         margin: 0 auto;
     }
-    #cruft {
+    #cruft, #list {
 	display: none;
 	background: #FBFBFB;
 	border: 1px solid #ccc;
@@ -22,6 +22,14 @@
 	-webkit-hyphens: auto;
 	-moz-hyphens: auto;
 	hyphens: auto;
+    }
+    #list ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+    }
+    #list ul li {
+	padding: 10px 0;
     }
     input {
 	width: 100%;
@@ -49,8 +57,28 @@
     <div id="cruft"></div>
     <p>
     <img src="asl.am.jpg" alt="prawn"></img>
+    <p>
+    <h2>Latest fulfillments</h2>
+    <div id="list"></div>
   </div>
   <script type="text/javascript">
+    function makeUL(array) {
+      var list = document.createElement('ul');
+
+      array = array.reverse();
+
+      for(i = 0; i < array.length; i++) {
+          var item = document.createElement('li');
+	  a = document.createElement('a');
+	  a.href = array[i];
+	  a.innerHTML = array[i];
+          item.appendChild(a);
+          list.appendChild(item);
+      }
+
+      return list;
+    };
+
     function lengthen() {
       var url = document.getElementById('url').value;
 
@@ -71,9 +99,35 @@
       }
 
       document.getElementById('cruft').style.display = 'block';
+      latest();
+      return false;
+    };
+
+    function latest() {
+      var xmlHttp = null;
+      xmlHttp = new XMLHttpRequest();
+      xmlHttp.open("GET", '/latest', false);
+      xmlHttp.send(null);
+
+      if (xmlHttp.status == 200) {
+	var urls = JSON.parse(xmlHttp.responseText);
+	if (urls == null) {
+	    return false;
+	}
+
+        var list = document.getElementById('list');
+	while (list.lastChild) {
+            list.removeChild(list.lastChild);
+        }
+	list.appendChild(makeUL(urls));     
+        list.style.display = 'block';
+      }
 
       return false;
-    }
+    };
+
+    (latest)();
+
   </script>
 </body>
 </html>
