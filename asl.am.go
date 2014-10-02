@@ -20,11 +20,35 @@ var (
 	latest chan string
 	reqCh  chan chan []string
 	words  []string
+	facts  map[string][]string
 )
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
+func loadFacts() {
+	facts = make(map[string][]string)
 
+	files, err := ioutil.ReadDir("/home/asim/facts")
+	if err != nil {
+		panic("cant get facts")
+	}
+
+	for _, file := range files {
+		log.Println("loading ", file.Name())
+		b, err := ioutil.ReadFile("/home/asim/facts/" + file.Name())
+		if err != nil {
+			panic("cant get words")
+		}
+
+		var quotes []string
+
+		for _, quote := range bytes.Split(b, []byte("\n")) {
+			quotes = append(quotes, strings.ToLower(string(quote)))
+		}
+
+		facts[file.Name()] = quotes
+	}
+}
+
+func loadWords() {
 	b, err := ioutil.ReadFile("/usr/share/dict/words")
 	if err != nil {
 		panic("cant get words")
@@ -33,6 +57,13 @@ func init() {
 	for _, word := range bytes.Split(b, []byte("\n")) {
 		words = append(words, strings.ToLower(string(word)))
 	}
+}
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+
+	loadFacts()
+	loadWords()
 
 	latest = make(chan string, 100)
 	reqCh = make(chan chan []string)
@@ -74,6 +105,15 @@ func random() string {
 	return word[:len(word)-1]
 }
 
+func randomFact(category string) string {
+	qs, ok := facts[category]
+	if !ok {
+		return random()
+	}
+
+	return qs[rand.Int()%(len(qs)-1)]
+}
+
 func main() {
 	http.HandleFunc("/latest", func(w http.ResponseWriter, r *http.Request) {
 		ch := make(chan []string)
@@ -81,7 +121,7 @@ func main() {
 		urls := <-ch
 		b, _ := json.Marshal(urls)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, string(b))
+		fmt.Fprint(w, string(b))
 	})
 
 	http.HandleFunc("/u/", func(w http.ResponseWriter, r *http.Request) {
@@ -118,8 +158,25 @@ func main() {
 			return
 		}
 
-		ul := fmt.Sprintf("http://%s/u/%s/%s", domain, encode(u), random())
-		fmt.Fprintf(w, ul)
+		var fact string
+		c := r.Form.Get("category")
+		switch c {
+		case "0":
+			fact = randomFact("cats")
+		case "1":
+			fact = randomFact("chucknorris")
+		case "2":
+			fact = random()
+		case "3":
+			fact = randomFact("numbers")
+		case "4":
+			fact = randomFact("archer")
+		default:
+			fact = random()
+		}
+
+		ul := fmt.Sprintf("http://%s/u/%s/%s", domain, encode(u), url.QueryEscape(fact))
+		fmt.Fprint(w, ul)
 
 		select {
 		case latest <- ul:
