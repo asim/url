@@ -3,65 +3,7 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>asl.am!</title>
-<style>
-    .main {
-        text-align: center;
-        font-family: Verdana, Geneva, sans-serif;
-        width: 90%;
-	max-width: 500px;
-        margin: 0 auto;
-    }
-    .facts {
-	width: 100%;
-	margin-bottom: 0;
-	padding: 0;
-    }
-    .facts li {
-	font-size: small;
-	display: inline-block;
-	background: #d8ecf3;
-	padding: 2px 0;
-	margin: 2px;
-	width: 17.5%;
-    }
-    #category {
-	width: 85%;
-    }
-    #cruft, #list {
-	display: none;
-	background: #FBFBFB;
-	border: 1px solid #ccc;
-	padding: 20px;
-	-ms-word-break: break-all;
-	word-break: break-all;
-	word-break: break-word;
-	-webkit-hyphens: auto;
-	-moz-hyphens: auto;
-	hyphens: auto;
-    }
-    #list ul {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-    }
-    #list ul li {
-	padding: 10px 0;
-    }
-    input {
-	width: 100%;
-        font-size: 20px;
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box; 
-        box-sizing: border-box;
-        padding: 10px;
-	text-align: center;
-    }
-    img {
-	max-width: 100%;
-	height: auto;
-	width: auto;
-    }
-</style>
+<link rel="stylesheet" type="text/css" href="asl.am.css">
 </head>
 <body>
   <div class="main">
@@ -71,12 +13,13 @@
       <ul class="facts">
 	<li>Cats</li>
 	<li>Chuck Norris</li>
-	<li>Gibberish</li>
+	<li>Random</li>
 	<li>Numbers</li>
 	<li>Archer</li>
       </ul>
       <input type=range min=0 max=4 value=2 id="category" name="category">
     </form>
+    <div id="gif"></div>
     <p>
     <div id="cruft"></div>
     <p>
@@ -85,74 +28,7 @@
     <h2>Latest fulfillments</h2>
     <div id="list"></div>
   </div>
-  <script type="text/javascript">
-    function makeUL(array) {
-      var list = document.createElement('ul');
-
-      array = array.reverse();
-
-      for(i = 0; i < array.length; i++) {
-          var item = document.createElement('li');
-	  a = document.createElement('a');
-	  a.href = array[i];
-	  a.innerHTML = decodeURIComponent(array[i].replace(/\+/g, " "));
-          item.appendChild(a);
-          list.appendChild(item);
-      }
-
-      return list;
-    };
-
-    function lengthen() {
-      var url = document.getElementById('url').value;
-      var category = document.getElementById('category').value;
-
-      if (!url.match('https?://')) {
-	url = 'http://' + url;
-      }
-
-      var xmlHttp = null;
-      xmlHttp = new XMLHttpRequest();
-      xmlHttp.open("GET", '/lengthen?url=' + encodeURIComponent(url) + '&category=' + category, false);
-      xmlHttp.send(null);
-
-      var cruft = document.getElementById('cruft');
-      if (xmlHttp.status == 200) {
-        cruft.innerHTML = '<a href="'+xmlHttp.responseText+'">'+decodeURIComponent(xmlHttp.responseText.replace(/\+/g, " "))+'</a>';
-      } else {
-        cruft.innerHTML = xmlHttp.responseText;
-      }
-
-      document.getElementById('cruft').style.display = 'block';
-      latest();
-      return false;
-    };
-
-    function latest() {
-      var xmlHttp = null;
-      xmlHttp = new XMLHttpRequest();
-      xmlHttp.open("GET", '/latest', false);
-      xmlHttp.send(null);
-
-      if (xmlHttp.status == 200) {
-	var urls = JSON.parse(xmlHttp.responseText);
-	if (urls == null) {
-	    return false;
-	}
-
-        var list = document.getElementById('list');
-	while (list.lastChild) {
-            list.removeChild(list.lastChild);
-        }
-	list.appendChild(makeUL(urls));     
-        list.style.display = 'block';
-      }
-
-      return false;
-    };
-
-    (latest)();
-
-  </script>
 </body>
+  <script src="asl.am.js"></script>
+  <script type="text/javascript">(latest)();</script>
 </html>
