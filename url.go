@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	dir    = "/home/asim/cache"
-	domain = "asl.am"
+	dir    = "/tmp/cache"
+	domain = "url.com"
 	latest chan string
 	reqCh  chan chan []string
 	words  []string
