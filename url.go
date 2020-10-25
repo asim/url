@@ -26,14 +26,14 @@ var (
 func loadFacts() {
 	facts = make(map[string][]string)
 
-	files, err := ioutil.ReadDir("/home/asim/facts")
+	files, err := ioutil.ReadDir("/tmp/facts")
 	if err != nil {
 		panic("cant get facts")
 	}
 
 	for _, file := range files {
 		log.Println("loading ", file.Name())
-		b, err := ioutil.ReadFile("/home/asim/facts/" + file.Name())
+		b, err := ioutil.ReadFile("/tmp/facts/" + file.Name())
 		if err != nil {
 			panic("cant get words")
 		}
